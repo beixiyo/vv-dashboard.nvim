@@ -319,10 +319,10 @@ function M.open()
   render()
   bind_keys(buf)
 
-  -- <Esc> 关闭 dashboard
-  vim.keymap.set('n', '<Esc>', function() M.close() end, {
-    buffer = buf, nowait = true, silent = true, desc = 'dashboard: close',
-  })
+  -- 阻止进入 I 模式
+  for _, key in ipairs({ 'i', 'I', 'a', 'A', 'o', 'O', 's', 'S', 'c', 'C', 'R' }) do
+    vim.keymap.set('n', key, '<Nop>', { buffer = buf, nowait = true, silent = true })
+  end
 
   -- 尺寸变化 / 布局变化（比如 <leader>e 开 explorer 后 dashboard 窗变窄）→ 重新居中
   local aug = vim.api.nvim_create_augroup('vv-dashboard.' .. buf, { clear = true })
