@@ -34,21 +34,21 @@ local ns = vim.api.nvim_create_namespace('vv-dashboard')
 ---@field [2]? string 高亮组
 
 ---@class VVDashboardHighlights
----@field header string  header 渲染用的 hl 组名，默认 'Title'
----@field icon string    keys 行 icon 的 hl 组名，默认 'Special'
----@field desc string    keys 行描述文字的 hl 组名，默认 'Normal'
----@field key string     keys 行按键的 hl 组名，默认 'Constant'
----@field footer string  footer 段（纯文本场景）的 hl 组名，默认 'Comment'
+---@field header string  header 渲染用的 hl 组名，默认 'Title' @default 'Title'
+---@field icon string    keys 行 icon 的 hl 组名，默认 'Special' @default 'Special'
+---@field desc string    keys 行描述文字的 hl 组名，默认 'Normal' @default 'Normal'
+---@field key string     keys 行按键的 hl 组名，默认 'Constant' @default 'Constant'
+---@field footer string  footer 段（纯文本场景）的 hl 组名，默认 'Comment' @default 'Comment'
 
 ---@class VVDashboardConfig
----@field header string|string[]
----@field keys VVDashboardKey[]
----@field footer? fun(): VVDashboardChunk[]|string  返回单行多色片段或纯文本
----@field auto_open boolean  启动时无参数 + 空 buffer 则自动开，默认 true
----@field filetype string  默认 'dashboard'（与 file-tree 的 close_on_filetype 对应）
----@field width integer     block 宽度（两端对齐的容器宽度），默认 60
----@field key_gap integer   keys 之间空行数，默认 1
----@field section_gap integer  header/keys/footer 之间空行数，默认 2
+---@field header string|string[] @default '...(ASCII art)...'
+---@field keys VVDashboardKey[] @default {}
+---@field footer? fun(): VVDashboardChunk[]|string  返回单行多色片段或纯文本 @default nil
+---@field auto_open boolean  启动时无参数 + 空 buffer 则自动开，默认 true @default true
+---@field filetype string  默认 'dashboard'（与 file-tree 的 close_on_filetype 对应） @default 'dashboard'
+---@field width integer     block 宽度（两端对齐的容器宽度），默认 60 @default 60
+---@field key_gap integer   keys 之间空行数，默认 1 @default 1
+---@field section_gap integer  header/keys/footer 之间空行数，默认 2 @default 2
 ---@field highlights VVDashboardHighlights  各段高亮组名；直接指向标准 hl 组，用户可覆盖
 local defaults = {
   header = [[
@@ -379,7 +379,7 @@ end
 function M.setup(opts)
   config = vim.tbl_deep_extend('force', defaults, opts or {})
 
-  vim.api.nvim_create_user_command('VVDashboard', function() M.open() end, {})
+  vim.api.nvim_create_user_command('VVDashboardOpen', function() M.open() end, {})
   vim.api.nvim_create_user_command('VVDashboardClose', function() M.close() end, {})
 
   if config.auto_open then
