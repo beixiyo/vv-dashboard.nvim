@@ -230,14 +230,22 @@ local function render()
   vim.bo[buf].modifiable = false
 
   -- 光标放在首个 key 行（避免停在空白上的空虚感）
-  local key_first_lnum = top_pad + #header_lines + (#header_lines > 0 and config.section_gap or 0) + 1
-  pcall(vim.api.nvim_win_set_cursor, win, { key_first_lnum, 0 })
+  -- header/keys 之间的 section_gap 仅在两段都非空时才真实插入；
+  -- keys 为空时（如纯 ASCII art + footer）没有 key 行，落到首个内容行
+  if #config.keys > 0 then
+    local gap = (#header_lines > 0 and #config.keys > 0) and config.section_gap or 0
+    local key_first_lnum = top_pad + #header_lines + gap + 1
+    pcall(vim.api.nvim_win_set_cursor, win, { key_first_lnum, 0 })
+  else
+    pcall(vim.api.nvim_win_set_cursor, win, { top_pad + 1, 0 })
+  end
 end
 
 -- ─── actions ────────────────────────────────────────────────────────────
 
--- 关闭浮窗 → 焦点自动回到底层主窗口 → schedule 执行 action
--- schedule 是必要的：M.close 会触发 BufWipeout autocmd，下一次事件循环才稳定
+-- M.close 把 dashboard 所在常规窗的 buffer 换成空 buffer（nvim_win_call + enew）；
+-- 焦点留在同一个常规窗（dashboard 本就是常规窗模型）→ 再 schedule 执行 action
+-- schedule 是必要的：bufhidden=wipe 触发的 BufWipeout autocmd 要等下一次事件循环才稳定
 local function exec_action(action)
   M.close()
   vim.schedule(function()
@@ -319,9 +327,13 @@ function M.open()
   render()
   bind_keys(buf)
 
-  -- 阻止进入 I 模式
+  -- 阻止进入 I 模式；跳过已被 action 占用的 key，避免覆盖（如默认 'c'）
+  local used = {}
+  for _, k in ipairs(config.keys) do used[k.key] = true end
   for _, key in ipairs({ 'i', 'I', 'a', 'A', 'o', 'O', 's', 'S', 'c', 'C', 'R' }) do
-    vim.keymap.set('n', key, '<Nop>', { buffer = buf, nowait = true, silent = true })
+    if not used[key] then
+      vim.keymap.set('n', key, '<Nop>', { buffer = buf, nowait = true, silent = true })
+    end
   end
 
   -- 尺寸变化 / 布局变化（比如 <leader>e 开 explorer 后 dashboard 窗变窄）→ 重新居中
