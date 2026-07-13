@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0] - 2026-07-13
 
 ### Fixed
 - 防输入 `<Nop>` 列表在 `bind_keys` 之后注册，覆盖了同名 action 键位（默认配置的 `c`「配置目录」被吞）；现先收集 `config.keys` 占用的键，`<Nop>` 循环里 `if not used[key]` 跳过它们，action 键保留 callback、未占用键仍 `<Nop>`
