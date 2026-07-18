@@ -337,7 +337,9 @@ function M.open()
   end
 
   -- 尺寸变化 / 布局变化（比如 <leader>e 开 explorer 后 dashboard 窗变窄）→ 重新居中
-  local aug = vim.api.nvim_create_augroup('vv-dashboard.' .. buf, { clear = true })
+  -- 固定单一组名（不再拼 buffer 号）：clear=true 每次 open 都能回收上一轮的 autocmd，
+  -- 否则 buffer 号单调递增使组名每次不同，旧组连同其全局 VimResized/WinResized 回调永久泄漏
+  local aug = vim.api.nvim_create_augroup('vv-dashboard', { clear = true })
   vim.api.nvim_create_autocmd({ 'VimResized', 'WinResized' }, {
     group = aug,
     callback = function()
@@ -374,6 +376,16 @@ function M.close()
   end
 end
 
+-- 当前 dashboard 开着（buffer + win 均有效）→ 关；否则 → 开
+function M.toggle()
+  if state and state.buf and vim.api.nvim_buf_is_valid(state.buf)
+    and state.win and vim.api.nvim_win_is_valid(state.win) then
+    M.close()
+  else
+    M.open()
+  end
+end
+
 -- VimEnter 时自动判断是否开启
 local function auto_open_check()
   if vim.fn.argc() ~= 0 then return end
@@ -393,6 +405,7 @@ function M.setup(opts)
 
   vim.api.nvim_create_user_command('VVDashboardOpen', function() M.open() end, {})
   vim.api.nvim_create_user_command('VVDashboardClose', function() M.close() end, {})
+  vim.api.nvim_create_user_command('VVDashboardToggle', function() M.toggle() end, {})
 
   if config.auto_open then
     if vim.v.vim_did_enter == 1 then

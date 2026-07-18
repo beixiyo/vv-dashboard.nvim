@@ -73,6 +73,7 @@ Each key action accepts either an Ex command string, with or without a leading `
 |---------|-------------|
 | `:VVDashboardOpen` | Open the dashboard, or focus its existing window if it is already open |
 | `:VVDashboardClose` | Close the dashboard and replace it with an empty buffer in the same window |
+| `:VVDashboardToggle` | Close the dashboard if it is open, otherwise open it |
 
 ## Design
 

@@ -73,6 +73,7 @@
 |------|------|
 | `:VVDashboardOpen` | 打开 dashboard；如果已经打开，则聚焦现有窗口 |
 | `:VVDashboardClose` | 关闭 dashboard，并在同一窗口中换入一个空 buffer |
+| `:VVDashboardToggle` | 已打开则关闭，否则打开 |
 
 ## 设计说明
 
