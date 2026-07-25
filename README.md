@@ -1,7 +1,7 @@
 <div align="center">
   <h1>vv-dashboard.nvim</h1>
   <p><a href="./README.md">English</a> | <a href="./README.zh-CN.md">中文</a></p>
-  <img src="./docs/assets/vv-dashboard.png" alt="vv-dashboard demo" width="900" />
+  <img src="https://github.com/beixiyo/vv-dashboard.nvim/releases/download/assets-2026-07-25/vv-dashboard.png" alt="vv-dashboard demo" width="900" />
   <p>Want my Neovim configuration? See <a href="https://github.com/beixiyo/dotfiles">dotfiles</a></p>
   <p><em>A minimal Neovim startup dashboard — one buffer, no floating window, and natural sidebar coexistence</em></p>
   <p>
