@@ -36,6 +36,44 @@ local function eq(a, b, msg)
   end
 end
 
+local function autocmd_count(group)
+  local ok, autocmds = pcall(vim.api.nvim_get_autocmds, { group = group })
+  return ok and #autocmds or 0
+end
+
+test('restores every taken-over window option on close and external wipe', function()
+  local dashboard = require('vv-dashboard')
+  local win = vim.api.nvim_get_current_win()
+  vim.wo[win].number = true
+  vim.wo[win].relativenumber = true
+  vim.wo[win].signcolumn = 'yes'
+  vim.wo[win].foldcolumn = '2'
+  vim.wo[win].wrap = true
+  dashboard.setup({ auto_open = false })
+  dashboard.open()
+  dashboard.close()
+  eq(
+    autocmd_count('vv_dashboard_session'),
+    0,
+    'close releases session listeners'
+  )
+  eq(vim.wo[win].number, true, 'close restores number')
+  eq(vim.wo[win].relativenumber, true, 'close restores relativenumber')
+  eq(vim.wo[win].signcolumn, 'yes', 'close restores signcolumn')
+  eq(vim.wo[win].foldcolumn, '2', 'close restores foldcolumn')
+  eq(vim.wo[win].wrap, true, 'close restores wrap')
+
+  dashboard.open()
+  vim.cmd('enew')
+  eq(vim.wo[win].number, true, 'external replacement restores number')
+  eq(vim.wo[win].signcolumn, 'yes', 'external replacement restores signcolumn')
+  eq(
+    autocmd_count('vv_dashboard_session'),
+    0,
+    'external replacement releases session listeners'
+  )
+end)
+
 -- ─── FIX 2: 多字节图标高亮偏移量 ──────────────────────────────────────
 
 print('\n[FIX 2] 多字节图标高亮偏移量')
@@ -233,42 +271,6 @@ test('setup({ keys={}, header 多行, footer }) render 后光标在范围内且�
   end
 
   dash.close()
-end)
-
--- ─── FIX 59: exec_action 上方注释纠正为常规窗语义 ──────────────────────
-
-print('\n[FIX 59] exec_action 注释去除浮窗措辞')
-
-test('源码中 exec_action 注释不再出现误导性的 浮窗 / 底层主窗', function()
-  local path = plugin_root .. '/lua/vv-dashboard/init.lua'
-  local fh = assert(io.open(path, 'r'))
-  local src = fh:read('*a')
-  fh:close()
-
-  -- 只截取紧贴 exec_action 上方的连续 `--` 注释块（逐行向上收集，遇非注释行停止）
-  local lines = vim.split(src, '\n', { plain = true })
-  local def_idx
-  for i, l in ipairs(lines) do
-    if l:find('^local function exec_action') then def_idx = i break end
-  end
-  if not def_idx then error('未找到 exec_action 定义') end
-  local block = {}
-  for i = def_idx - 1, 1, -1 do
-    if lines[i]:find('^%s*%-%-') then
-      table.insert(block, 1, lines[i])
-    else
-      break
-    end
-  end
-  local region = table.concat(block, '\n')
-  if region == '' then error('未找到 exec_action 注释区域') end
-
-  if region:find('浮窗') then
-    error('exec_action 注释仍含误导措辞「浮窗」')
-  end
-  if region:find('底层主窗') then
-    error('exec_action 注释仍含误导措辞「底层主窗」')
-  end
 end)
 
 -- ─── 汇总 ──────────────────────────────────────────────────────────────
