@@ -4,6 +4,7 @@ local M = {}
 
 local session_group_name = 'vv_dashboard_session'
 local setup_group_name = 'vv_dashboard_setup'
+local auto_open_epoch = 0
 
 function M.clear_session()
   pcall(vim.api.nvim_del_augroup_by_name, session_group_name)
@@ -34,18 +35,25 @@ end
 ---@param enabled boolean
 ---@param open fun()
 function M.configure_auto_open(enabled, open)
+  auto_open_epoch = auto_open_epoch + 1
+  local epoch = auto_open_epoch
   local group = vim.api.nvim_create_augroup(setup_group_name, { clear = true })
+
   if not enabled then return end
 
+  local function open_if_current()
+    if epoch == auto_open_epoch then open() end
+  end
+
   if vim.v.vim_did_enter == 1 then
-    vim.schedule(open)
+    vim.schedule(open_if_current)
     return
   end
 
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
     once = true,
-    callback = open,
+    callback = open_if_current,
   })
 end
 

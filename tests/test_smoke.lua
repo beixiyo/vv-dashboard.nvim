@@ -41,6 +41,21 @@ local function autocmd_count(group)
   return ok and #autocmds or 0
 end
 
+test('后续 setup 可取消同 tick 已排队的 auto-open', function()
+  local dashboard = require('vv-dashboard')
+  dashboard.setup({ auto_open = true })
+  dashboard.setup({ auto_open = false })
+
+  vim.wait(50)
+  eq(require('vv-dashboard.state').is_open(), nil, '旧 auto-open 不应穿透新配置')
+
+  dashboard.setup({ auto_open = true })
+  assert(vim.wait(1000, function()
+    return require('vv-dashboard.state').is_open()
+  end), '当前 generation 的 auto-open 应正常打开')
+  dashboard.close()
+end)
+
 test('restores every taken-over window option on close and external wipe', function()
   local dashboard = require('vv-dashboard')
   local win = vim.api.nvim_get_current_win()
