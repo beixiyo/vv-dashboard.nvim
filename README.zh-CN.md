@@ -16,7 +16,7 @@
 
 - 在常规窗口中使用单个 `nofile` buffer，而非浮窗，因此 `vv-explorer` 等侧栏可以继续显示
 - 渲染三个可配置区域：多行 header、快捷键和支持高亮片段的单行 footer
-- 按显示宽度水平居中每一行，并将整个 dashboard 垂直居中
+- header 按整块居中（各行共用同一左偏移），keys 和 footer 按显示宽度逐行居中，整个 dashboard 垂直居中
 - 自动选择主区域窗口，跳过已知侧栏；只有全部常规窗口都是侧栏时才新建垂直分屏
 - 在 `VimResized` 和 `WinResized` 后自动重新居中
 - 仅在 Neovim 无启动参数、当前 buffer 为空且没有恢复出的具名文件 buffer 时自动打开
@@ -81,7 +81,7 @@ Dashboard 占用常规窗口，而不是浮窗。这样可以避免全屏浮窗�
 
 Dashboard buffer 使用 `buftype=nofile`、`bufhidden=wipe`，不进入 buffer 列表并禁用 swap。行号、sign column、折叠、换行和 cursor line 等窗口局部装饰会被显式关闭。执行 action 时，dashboard 会先在同一个常规窗口中被空 buffer 替换，再把 action 调度到下一轮事件循环，让 buffer 清理安全完成。
 
-渲染由 `header`、`keys` 和 `footer` 三段组成。文本按照显示宽度居中，因此多字节图标和文字也能保持对齐；快捷键行以 `width` 作为左右对齐的容器宽度。Footer 可以返回纯文本或带高亮的片段。尺寸变化事件会触发重新渲染，让 dashboard 在周边布局改变后仍保持居中。
+渲染由 `header`、`keys` 和 `footer` 三段组成。文本按照显示宽度居中，因此多字节图标和文字也能保持对齐；`header` 以所有行的最大显示宽度为准整块居中，各行共用同一左偏移，避免 ASCII art 行宽不一致时窄行被单独推偏；快捷键行以 `width` 作为左右对齐的容器宽度。Footer 可以返回纯文本或带高亮的片段。尺寸变化事件会触发重新渲染，让 dashboard 在周边布局改变后仍保持居中。
 
 自动打开采用保守门禁：Neovim 带启动参数、当前 buffer 有内容或名称、或 session 插件已经恢复出具名且 listed 的 buffer 时，均不会自动打开。
 

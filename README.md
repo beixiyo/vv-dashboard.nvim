@@ -16,7 +16,7 @@
 
 - Uses a single `nofile` buffer in a regular window instead of a floating window, allowing sidebars such as `vv-explorer` to remain visible
 - Renders three configurable sections: a multiline header, shortcut keys, and a single-line footer with optional highlight chunks
-- Centers each line horizontally by display width and centers the entire dashboard vertically
+- Centers the header as a single block (all rows share one left offset), centers key and footer lines by display width, and centers the entire dashboard vertically
 - Selects a main-area window automatically, skips known sidebar windows, and opens a new vertical split only when every regular window is a sidebar
 - Re-centers automatically after `VimResized` and `WinResized`
 - Opens automatically only when Neovim starts without arguments, the current buffer is empty, and no named file buffer has been restored
@@ -81,7 +81,7 @@ The dashboard occupies a regular window rather than a floating window. This prev
 
 The buffer uses `buftype=nofile`, `bufhidden=wipe`, is unlisted, and has swap disabled. Window-local decorations such as line numbers, the sign column, folds, wrapping, and the cursor line are disabled explicitly. When an action runs, the dashboard is replaced with an empty buffer in the same regular window, then the action is scheduled for the next event-loop turn so buffer cleanup can finish safely.
 
-Rendering consists of the `header`, `keys`, and `footer` sections. Text is centered using display width, which keeps multibyte icons and text aligned, while the key rows use `width` as their left/right alignment container. The footer may return plain text or highlighted chunks. Resize events trigger a fresh render so the dashboard remains centered as the surrounding layout changes.
+Rendering consists of the `header`, `keys`, and `footer` sections. Text is centered using display width, which keeps multibyte icons and text aligned. The `header` is centered as a block against the widest of its rows so every row shares one left offset — ASCII art whose rows differ in width no longer has its narrow rows pushed sideways. The key rows use `width` as their left/right alignment container. The footer may return plain text or highlighted chunks. Resize events trigger a fresh render so the dashboard remains centered as the surrounding layout changes.
 
 Automatic opening is intentionally conservative: it is skipped when Neovim receives arguments, when the current buffer contains content or has a name, or when a named listed buffer has already been restored by a session plugin.
 

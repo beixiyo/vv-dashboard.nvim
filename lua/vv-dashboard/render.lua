@@ -52,10 +52,16 @@ function M.render(session, config)
   local win_height = vim.api.nvim_win_get_height(win)
   local headers = header_lines(config)
 
+  -- header 按整块居中：ASCII art 各行宽度常不一致，逐行居中会让窄行整体偏移
+  local header_width = 0
   for _, text in ipairs(headers) do
-    local left = centered_padding(win_width, display_width(text))
-    lines[#lines + 1] = string.rep(' ', left) .. text
-    marks[#marks + 1] = { #lines - 1, left, left + #text, config.highlights.header }
+    header_width = math.max(header_width, display_width(text))
+  end
+  local header_left = centered_padding(win_width, header_width)
+
+  for _, text in ipairs(headers) do
+    lines[#lines + 1] = string.rep(' ', header_left) .. text
+    marks[#marks + 1] = { #lines - 1, header_left, header_left + #text, config.highlights.header }
   end
 
   if #headers > 0 and #config.keys > 0 then add_gap(lines, config.section_gap) end
